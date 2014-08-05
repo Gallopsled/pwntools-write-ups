@@ -1,4 +1,4 @@
 pwntools-write-ups
 ==================
 
-A colleciton of CTF write-ups all using pwntools
+A collection of CTF write-ups all using pwntools
