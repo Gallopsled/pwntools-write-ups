@@ -13,8 +13,7 @@ with tempfile.NamedTemporaryFile() as fd:
     p = process(["./doit.py", "SILENT", "HOST=localhost", "PORT=" + str(l.lport)])
 
     p.sendline("base64 " + fd.name)
-    p.shutdown("send")
-    if p.recvall().strip() == b64e(s):
+    if p.recvline().strip() == b64e(s):
         print "ok"
     else:
         print "not ok"

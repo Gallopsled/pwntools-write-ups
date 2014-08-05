@@ -3,7 +3,13 @@ from pwn import *
 
 context(arch = 'i386', os = 'linux')
 
-r = remote(args['HOST'], int(args['PORT']))
+# Demo should work even without a remote host
+if 'HOST' in args:
+    r = remote(args['HOST'], int(args['PORT']))
+else:
+    l = listen(0)
+    l.spawn_process(['./bbgp_7cdbfdae936b3c6ed10588119a8279a0'])
+    r = remote('localhost', l.lport)
 
 p16b = make_packer  (16, 'big', 'unsigned')
 u16b = make_unpacker(16, 'big', 'unsigned')

