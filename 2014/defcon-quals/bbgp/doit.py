@@ -3,16 +3,7 @@ from pwn import *
 
 context(arch = 'i386', os = 'linux')
 
-# Damn ugly hack to start the program with a socket
-l = listen(1337)
-r = remote('127.0.0.1', l.lport)
-l.wait_for_connection()
-if os.fork() == 0:
-    os.dup2(l.fileno(), 0)
-    os.dup2(l.fileno(), 1)
-    os.dup2(l.fileno(), 2)
-    os.execl("./bbgp_7cdbfdae936b3c6ed10588119a8279a0", "./bbgp_7cdbfdae936b3c6ed10588119a8279a0")
-    os._exit(1)
+r = remote(args['HOST'], int(args['PORT']))
 
 p16b = make_packer  (16, 'big', 'unsigned')
 u16b = make_unpacker(16, 'big', 'unsigned')

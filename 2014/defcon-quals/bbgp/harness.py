@@ -8,7 +8,10 @@ with tempfile.NamedTemporaryFile() as fd:
     fd.write(s)
     fd.flush()
 
-    p = process(["./doit.py", "SILENT"])
+    l = listen(0)
+    l.spawn_process(['./bbgp_7cdbfdae936b3c6ed10588119a8279a0'])
+    p = process(["./doit.py", "SILENT", "HOST=localhost", "PORT=" + str(l.lport)])
+
     p.sendline("base64 " + fd.name)
     p.shutdown("send")
     if p.recvall().strip() == b64e(s):

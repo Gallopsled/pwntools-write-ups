@@ -8,7 +8,10 @@ with tempfile.NamedTemporaryFile() as fd:
     fd.write(s)
     fd.flush()
 
-    p = process(["./doit.py", "SILENT"])
+    l = listen(0)
+    l.spawn_process(['./babyfirst-heap_33ecf0ad56efc1b322088f95dd98827c'])
+    p = process(["./doit.py", "SILENT", "HOST=localhost", "PORT=" + str(l.lport)])
+
     p.sendline("base64 " + fd.name)
     p.shutdown("send")
 
