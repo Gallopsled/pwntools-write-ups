@@ -8,7 +8,8 @@ for path, dirs, files in os.walk('.'):
         for f in files:
             if f.startswith('harness'):
                 h = log.waitfor('Running harness for ' + path)
-                data = process("./" + f, cwd = path, log_level = 0).recvall().strip() 
+                with context.local(log_level = 'silent'):
+                    data = process("./" + f, cwd = path).recvall().strip()
                 if data == 'ok':
                     h.success()
                 else:
