@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 from pwn import *
 
 binary = './ropasaurusrex-85a84f36f81e11f720b1cf5ea0d1fb0d5a603c0d'

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 from struct import pack,unpack
 
 # Poly in "reversed" notation -- http://en.wikipedia.org/wiki/Cyclic_redundancy_check

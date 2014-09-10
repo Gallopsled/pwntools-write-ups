@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import sys
 from os          import execve, getpid, symlink, path
 from collections import OrderedDict

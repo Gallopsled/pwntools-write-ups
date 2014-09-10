@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 from pwn   import *
 from funcy import silent
@@ -32,14 +32,13 @@ if not os.path.exists(chal):
 # on the remote machine.  Lots of warnings and errors.
 # However, it still works fine if you hit "continue".
 #
-with file('noarg.py','w+') as noarg:
-    noarg.write("""
+noarg = """
 import os, sys
 os.execve(sys.argv[1],[],{})
-""")
+"""
 
 shell.set_working_directory()
-shell.upload_file('noarg.py')
+shell.upload_data(noarg, 'noarg.py')
 
 #
 # Step 1:
