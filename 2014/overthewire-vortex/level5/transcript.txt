@@ -1,0 +1,5 @@
+[+] Starting SSH connection to "vortex.labs.overthewire.org": Done
+[!] SSH key could not be validated
+[+] Opening new channel: '/vortex/vortex5': Done
+[+] id: Password: uid=5006(vortex6) gid=5005(vortex5) groups=5006(vortex6),5005(vortex5)
+[+] password: <removed>

