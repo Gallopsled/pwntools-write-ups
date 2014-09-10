@@ -4,6 +4,9 @@ for path, dirs, files in os.walk('.'):
     if '.git' in path:
         continue
 
+    if 'wargames' in path:
+        continue
+
     if not dirs:
         for f in files:
             if f.startswith('harness'):

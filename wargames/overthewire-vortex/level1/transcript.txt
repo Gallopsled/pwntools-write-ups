@@ -1,0 +1,6 @@
+[*] Connecting to vortex.labs.overthewire.org on port 22...
+[+] Connecting to vortex.labs.overthewire.org on port 22: OK
+[*] Opening new channel: '/vortex/vortex1'...
+[+] Opening new channel: '/vortex/vortex1': OK
+[+] id: uid=5002(vortex2) gid=5001(vortex1) groups=5002(vortex2),5001(vortex1)
+[+] password: <removed>

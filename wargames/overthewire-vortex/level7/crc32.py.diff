@@ -1,0 +1,31 @@
+diff --git a/orig.py b/crc32.py
+index 19dec87..0a2ee01 100644
+--- a/orig.py
++++ b/crc32.py
+@@ -30,22 +30,22 @@ crc32_table, crc32_reverse = [0]*256, [0]*256
+ build_crc_tables()
+ 
+ def crc32(s): # same crc32 as in (binascii.crc32)&0xffffffff
+-  crc = 0xffffffff
++  crc = 0 #0xffffffff
+   for c in s:
+     crc = (crc >> 8) ^ crc32_table[(crc ^ ord(c)) & 0xff]
+-  return crc^0xffffffff
++  return crc #^0xffffffff
+ 
+ def forge(wanted_crc, str, pos=None):
+   if pos is None:
+     pos = len(str)
+ 
+   # forward calculation of CRC up to pos, sets current forward CRC state
+-  fwd_crc = 0xffffffff
++  fwd_crc = 0 # <<<< PATCHED!
+   for c in str[:pos]:
+     fwd_crc = (fwd_crc >> 8) ^ crc32_table[(fwd_crc ^ ord(c)) & 0xff]
+ 
+   # backward calculation of CRC up to pos, sets wanted backward CRC state
+-  bkd_crc = wanted_crc^0xffffffff
++  bkd_crc = wanted_crc #^0xffffffff # <<<< PATCHED!
+   for c in str[pos:][::-1]:
+     bkd_crc = ((bkd_crc << 8)&0xffffffff) ^ crc32_reverse[bkd_crc >> 24] ^ ord(c)
+ 
