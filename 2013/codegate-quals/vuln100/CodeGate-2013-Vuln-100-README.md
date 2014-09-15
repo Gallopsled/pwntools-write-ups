@@ -34,19 +34,19 @@ This example makes use of pwnies' [pwntools](https://github.com/pwnies/pwntools)
 
 ```python
 from pwn import *
-r = remote('localhost',6666,timeout=0.5)
+r = remote('localhost',6666)
 >>> [+] Opening connection to localhost on port 6666: Done
 r.sendline('arsenal')
-r.recvall()
+r.recvrepeat()
 >>> [+] Recieving all data: Done
 r.sendline('gyeongbokgung')
-r.recvall()
+r.recvrepeat()
 >>> [+] Recieving all data: Done
 r.sendline('psy')
-r.recvall()
+r.recvrepeat()
 >>> [+] Recieving all data: Done
 r.sendline('A\x00')
-print hexdump(r.recvall())
+print hexdump(r.recvrepeat())
 00000000  41 00 7c 40 ff 7f 00 00   a0 98 ae ed 52 7f 00 00  |A.|@........R...|
 00000010  00 00 00 00 00 00 00 00   40 7e 7c 40 ff 7f 00 00  |........@~|@....|
 00000020  90 0a 40 00 00 00 00 00   40 a7 e9 ed 52 7f 00 00  |..@.....@...R...|

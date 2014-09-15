@@ -102,7 +102,7 @@ This example makes use of pwnies' [pwntools](https://github.com/pwnies/pwntools)
     #!/usr/bin/env python
     from pwn import *
     r = remote('localhost', 7777)
-    r.recvall()
+    r.clean(1)
     r.send('write ' + de_bruijn(0x200))
 
 And we do get a crash, with lots of the register context controlled.

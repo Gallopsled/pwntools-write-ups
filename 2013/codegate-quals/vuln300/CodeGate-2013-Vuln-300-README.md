@@ -113,15 +113,3 @@ In fact, this is exactly the case as in pwn200 -- the data from the second argum
 
 1. Provide a negative value (`-8`) for the `strncpy` to overwrite the `vtable` pointer of our heap object.
 2. Create a fake vtable at `080491E0` by passing in `080491E4` as the first four bytes of the secondary buffer.  Add `080491E0` after that, since this will actually nuke the `vtable` pointer.  Add our shellcode after that.
-
-## Final Thoughts
-
-I ran into a lot of trouble getting this to work properly with my normal `socat` line, since the addresses we are sending have `\x08` in it which is the backspace character.  I believe the issue is due to the `pty` flag, which creates a terminal and thus interprets `\b` as backspace.  Normally I have this turned on so that there's no stdin/stdout buffering, but here it was very painful (wasted an hour+).
-
-Troublesome socat:
-
-    socat tcp-l:6666,reuseaddr,fork exec:'./8ff953dd97c4405234a04291dee39e0b',pty,setsid,setpgid,stderr,ctty,echo=0
-
-Working socat:
-
-    socat tcp-l:6666,reuseaddr,fork exec:'./8ff953dd97c4405234a04291dee39e0b'
