@@ -2,8 +2,16 @@
 from pwn import *
 context(os='linux', arch='i386')
 
-# Start the challenge.  It runs on port 7777.
-# process('./5b7420a5bcdc1da85bccc62dcea4c7b8')
+# If a HOST is given on the cmdline, then assume that it is already running there
+if 'HOST' in pwn.args:
+    HOST = pwn.args['HOST']
+    PORT = int(pwn.args.get('PORT', 7777))
+else:
+    # Otherwise start the binary locally
+    HOST = 'localhost'
+    PORT = 7777
+    process('./5b7420a5bcdc1da85bccc62dcea4c7b8')
+    sleep(0.1)
 
 r = remote('localhost', 7777, timeout=0.5)
 r.clean(1)

