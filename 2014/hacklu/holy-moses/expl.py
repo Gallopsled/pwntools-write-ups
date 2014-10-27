@@ -1,13 +1,4 @@
 #!/usr/bin/python
-#
-# Note that this exploit requires an unreleased version of pwntools.
-#
-#  $ git clone https://github.com/zachriggle/pwntools
-#  $ cd pwntools
-#  $ export PYTHONPATH=$PWD
-#  $ git checkout
-#
-
 """
 
 ----- SALOON ------
