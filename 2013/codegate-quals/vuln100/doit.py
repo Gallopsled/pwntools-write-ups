@@ -10,7 +10,7 @@ else:
     # Otherwise start the binary locally
     HOST = 'localhost'
     PORT = 6666
-    process('./94dd6790cbf7ebfc5b28cc289c480e5e')
+    service = process('./94dd6790cbf7ebfc5b28cc289c480e5e')
     sleep(0.1)
 
 #
@@ -133,3 +133,6 @@ with remote(HOST, PORT, timeout=0.5) as r:
     solve_riddle(r)
     r.send(buf)
     r.interactive()
+
+if service:
+    service.close()

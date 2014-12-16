@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 from pwn import *
+import os, signal
 context.log_level = 1000
 
 with tempfile.NamedTemporaryFile() as fd:
@@ -8,12 +9,13 @@ with tempfile.NamedTemporaryFile() as fd:
     fd.write(s)
     fd.flush()
 
-    l = listen(0)
-    l.spawn_process(['./citadel'])
-    p = process(["./doit.py", "SILENT", "HOST=localhost"])
+    try:
+        p = process(["./doit.py", "SILENT"])
 
-    p.sendline("base64 " + fd.name)
-    if p.recvline().strip() == b64e(s):
-        print "ok"
-    else:
-        print "not ok"
+        p.sendline("base64 " + fd.name)
+        if p.recvline(timeout = 10).strip() == b64e(s):
+            print "ok"
+        else:
+            print "not ok"
+    finally:
+        p.close()

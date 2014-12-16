@@ -13,7 +13,7 @@ for path, dirs, files in os.walk('.'):
         for f in files:
             if f.startswith('harness'):
                 h = log.waitfor('Running harness for ' + path)
-                with context.local(log_level = 'silent'):
+                with context.local(log_level = 'WARNING'):
                     data = process("./" + f, cwd = path).recvall().strip()
                 if data == 'ok':
                     h.success()

