@@ -1,0 +1,371 @@
+== WHEEE
+
+*UPDATE*: I was contacted Apocalyptic from w3stormz regarding an improvement to
+          the attack.  Scroll to the bottom for optimizations and benchmarks.
+
+In this challenge we will carry out a chosen plaintext attack on a block cipher
+in order to recover the round keys.
+
+We are given some python code which implement an encryption algorithm used by an
+online service.  When connecting to the service we are asked for a typical SHA1
+based proof-of-work.  After submitting that we can send a (hex-encoded) string
+to encrypt, and after some time (the encryption algorithm is extremely slow to
+prevent offline brute force attacks) we get back the encrypted string (again
+hex-encoded).
+
+So let's look at the encryption algorithm;  It is a block cipher running in ECB
+mode.  Each block is 24 bits and is big-endian encoded.
+
+At a first glance the block cipher looks like a Feistel network with 2^24
+rounds.  Because of a (intentional?) typo it is not a Feistel network, but it is
+educational to analyse it as such, so for now let's ignore the typo.  Because of
+a very weak key scheduling this cipher can be attacked.
+
+In the following we will denote the secret key to be uncovered by KEY, not to be
+confused with key, k, k0, k1 or similar names.
+
+A team member mentioned the following attack on a Feistel network with a weak
+key schedule, which we later modified to the cipher used in the challenge.
+
+*NOTE*: We first describe this attack against a Feistel network, then modify it
+        to fit the cipher found in the challenge.
+
+The implementation looks like this:
+
+    def encrypt_block (block, key):
+        l, r = split(block)
+        for i in range(numrounds):
+            if x % 2 == 0:
+                # even numbered round
+                l1 = r
+                r1 = l ^ F(r, key[0])
+                l, r = l1, r1
+            else:
+                # odd numbered round
+                l1 = r
+                r1 = l ^ F2(r, key[1])
+                l, r = l1, r1
+        return combine(l, r)
+
+The functions F and F2 are implemented as
+
+    def F (x, k):
+        return f[x ^ k]
+
+    def F2 (x, k):
+        return f2[x ^ k]
+
+Where f and f2 are invertible tables.  The only fact we will use is that they
+are bijections.  That is, f^-1 and f2^-1 exists and we can compute them easily.
+We will call them fi and f2i respectively.
+
+Here is a drawing of one double-round of the network:
+
+    .-------------------------------.
+    |       l0      |       r0      |
+    '-------------------------------'  --.
+            |               |            |
+            |       k0      |            |
+            |       |       |            |
+            |    .-----.    |            |
+            |    |     |    |            |
+           (+)---|  F  |----|             > Even rounds
+            |    |     |    |            |
+            |    '-----'    |            |
+            '------. .------'            |
+                    X                    |
+            .------' '------.            |
+            |               |            |
+    .-------------------------------.  --'
+    |       l1      |       r1      |
+    '-------------------------------'  --.
+            |               |            |
+            |       k1      |            |
+            |       |       |            |
+            |    .-----.    |            |
+            |    |     |    |            |
+           (+)---|  F2 |----|             > Odd rounds
+            |    |     |    |            |
+            |    '-----'    |            |
+            '------. .------'            |
+                    X                    |
+            .------' '------.            |
+            |               |            |
+    .-------------------------------.  --'
+    |       l2      |       r2      |
+    '-------------------------------'
+
+One double-round can be implemented as:
+
+    def dblround (block, key):
+        l, r = split(block)
+
+        # even numbered round
+        l1 = r
+        r1 = l ^ F(r, key[0])
+        l, r = l1, r1
+
+        # odd numbered round
+        l1 = r
+        r1 = l ^ F2(r, key[1])
+        l, r = l1, r1
+
+        return combine(l, r)
+
+And now the encryption function becomes:
+
+    def encrypt_block (block, key):
+        for _ in range(numrounds / 2):
+            block = dblround(block, key)
+        return block
+
+Given the diagram above we have these relations:
+
+    l2 = r1
+       = l0 ^ F(r0, k0)
+       = l0 ^ f[r0 ^ k0]
+
+    r2 = l1 ^ F2(r1, k1)
+       = r0 ^ F2(l0 ^ f[r0 ^ k0], k1)
+       = r0 ^ f2[l0 ^ f[r0 ^ k0] ^ k1]
+
+Rewriting:
+
+                l2 = l0 ^ f[r0 ^ k0]
+           l2 ^ l0 = f[r0 ^ k0]
+       fi[l2 ^ l0] = r0 ^ k0
+  fi[l2 ^ l0] ^ r0 = k0
+                k0 = fi[l2 ^ l0] ^ r0
+
+                r2 = r0 ^ f2[l0 ^ f[r0 ^ k0] ^ k1]
+           r2 ^ r0 = f2[l0 ^ f[r0 ^ k0] ^ k1]
+      f2i[r2 ^ r0] = l0 ^ f[r0 ^ k0] ^ k1
+                k1 = l0 ^ f[r0 ^ k0] ^ f2i[r2 ^ r0]
+
+In other words, given l0, r0 and l2, r2, the key is completely determined.
+
+Now for the actual attack!  If we generate blocks P1, P2, ... at random, by the
+birthday paradox we expect to have a collision (i.e. Pi = Pj for some i, j)
+after ~2^12 generated blocks.  In fact, for any bijection f, we expect there to
+be i and j such that Pj = f(Pi).  Since dblround is a bijection (it must be, or
+decryption would be impossible) we expect Pj = dblround(Pi, KEY) for some i, j.
+
+Let Ci = encrypt_block(Pi, KEY) for all i.
+
+Drawing ln, rn for each round of the network we have:
+
+    [  l0  |  r0  ]  < Pi
+    [  l1  |  r1  ]
+    [  l2  |  r2  ]  < Pj > [  l'0  |  r'0  ]
+          ...                      ...
+    [ ln-1 | rn-1 ]  < Ci          ...
+                                   ...
+                       Cj > [ l'n-1 | r'n-1 ]
+
+From this it is easy to see that Cj = dblround(Ci, KEY).  Now since we can
+compute k0, k1 from Pi, Pj we can check wether Cj = dblround(Ci, (k0, k1)).  If
+that is the case there is a good chance that we indeed found Pi, Pj such that
+Pj = dblround(Pi, KEY), and thus KEY = (k0, k1).  We can check the validity of
+(k0, k1) by encrypting some of our Pi comparing against Ci.
+
+We need to do this for every pair (Pi, Pj) and we expect a collision after ~2^12
+blocks.  Therefore the expected running time will be ~2^24 offline and ~2^12
+online.
+
+OK, that's it for the Feistel network; back to the actual cipher used in the
+challenge.
+
+The cipher in the challenge is actually *not* a Feistel network.  The dblround
+function looks like this:
+
+    def dblround (block, key):
+        l, r = split(block)
+
+        # even numbered round
+        l1 = r
+        r1 = l ^ F(r, key[0])
+        l, r = l1, r1
+
+        # odd numbered round
+        l1 = l                           # <--  right there!
+        r1 = l ^ F2(r, key[1])
+        l, r = l1, r1
+
+        return combine(l, r)
+
+In the odd rounds the left half is not changed.  The cipher looks like this:
+
+    .-------------------------------.
+    |       l0      |       r0      |
+    '-------------------------------'  --.
+            |               |            |
+            |       k0      |            |
+            |       |       |            |
+            |    .-----.    |            |
+            |    |     |    |            |
+           (+)---|  F  |----|             > Even rounds
+            |    |     |    |            |
+            |    '-----'    |            |
+            '------. .------'            |
+                    X                    |
+            .------' '------.            |
+            |               |            |
+    .-------------------------------.  --'
+    |       l1      |       r1      |
+    '-------------------------------'  --.
+            |               |            |
+            |            .-----.         |
+            |            |     |         |
+            |       k1 --|  F2 |         |
+            |            |     |          > Odd rounds
+            |            '-----'         |
+            |               |            |
+            |--------------(+)           |
+            |               |            |
+    .-------------------------------.  --'
+    |       l2      |       r2      |
+    '-------------------------------'
+
+This diagram gives us these relations:
+
+    l2 = r0
+
+    r2 = r0 ^ F2(r1, k1)
+       = r0 ^ F2(l0 ^ f[r0 ^ k0], k1)
+       = r0 ^ f2[l0 ^ f[r0 ^ k0] ^ k1]
+
+Rewriting:
+
+                r2 = r0 ^ f2[l0 ^ f[r0 ^ k0] ^ k1]
+           r2 ^ r0 = f2[l0 ^ f[r0 ^ k0] ^ k1]
+      f2i[r2 ^ r0] = l0 ^ f[r0 ^ k0] ^ k1
+                k1 = l0 ^ f[r0 ^ k0] ^ f2i[r2 ^ r0]
+
+At first glance it looks like we are worse off than in the Feistel case because
+the key cannot be uniquely determined.  Of course we can generate and check
+every key for k0 = 0..0xfff.  This worsens the offline time complexity by a
+factor of 2^12 giving ~2^36 which is still acceptable.
+
+But we can do much better.  If Pj = dblround(Pi, KEY) then left(Pj) = right(Pi)
+because l2 = r0.
+
+This means that for a fixed Pi = (l0, r0) there are only 2^12 candidates for Pj,
+namely Pj_n = (r0, n), for n = 0..0xfff.  For each of these 2^12 Pj we need to
+check 2^12 keys, giving an offline time complexity of 2^24 (and an online time
+complexity of 2^12).
+
+The plaintexts one should choose are thus:
+
+    Pi = (l0, r0), Pj_0 = (r0, 0), Pj_1 = (r0, 1), ..., Pj_0xfff = (r0, 0xfff)
+
+And the correct key can be found by (pseudocode):
+
+    fix Pi
+    obtain Ci, Cj_n
+    for n in 0..0xfff:
+        let Pj, Cj = Pj_n, Cj_n
+        for k0 in 0..0xfff:
+            determine k1 from Pi, Pj, k0
+            if dblround(Ci, (k0, k1)) = Cj:
+                if encrypt_block(Pm, (k0, k1)) = Cm for several m:
+                    print WIN!
+                    print The key is (k0, k1)
+                    return
+
+Unfortunately we spend too much time on implementing the attack to obtain the
+necessary ciphertexts before the end of the CTF.  We collected some data at
+random in anticipation of an offline attack while working on the challenge, and
+unfortunately there is no Pj = dblround(Pi, KEY) collision among it.
+
+
+== UPDATE: OPTIMIZATIONS AND BENCHMARKS
+
+I was contacted by Apocalyptic from w3stormz regarding an improvement.  Let Ci =
+(l'0, r'0) and Cj = (l'2, r'2).  What he noticed was that for the right Pj we
+have
+
+    k1 = l0 ^ f[r0 ^ k0] ^ f2i[r2 ^ r0]
+    k1 = l'0 ^ f[r'0 ^ k0] ^ f2i[r'2 ^ r'0]
+
+And XOR'ing both sides
+
+    0 = l0 ^ l'0 ^ f[r0 ^ k0] ^ f[r'0 ^ k0] ^ f2i[r2 ^ r0] ^ f2i[r'2 ^ r'0]
+    f[r0 ^ k0] ^ f[r'0 ^ k0] = l0 ^ l'0 ^ f2i[r2 ^ r0] ^ f2i[r'2 ^ r'0]
+
+For each Pj, the right hand side can be precomputed giving an effecient way to
+weed out wrong Pj's.
+
+The pseudocode becomes (where the lines marked (*) are the improvement):
+
+    fix Pi
+    obtain Ci, Cj_n
+    for n in 0..0xfff:
+        let Pj, Cj = Pj_n, Cj_n
+        let x = l0 ^ l'0 ^ f2i[r2 ^ r0] ^ f2i[r'2 ^ r'0]             (*)
+        for k0 in 0..0xfff:
+            if f[r0 ^ k0] ^ f[r'0 ^ k0] <> x:                        (*)
+                continue                                             (*)
+            determine k1 from Pi, Pj, k0
+            if dblround(Ci, (k0, k1)) <> Cj:
+                continue
+            if encrypt_block(Pm, (k0, k1)) = Cm for several m:
+                print WIN!
+                print The key is (k0, k1)
+                return
+
+We can further improve the attack by noticing that we must have l'2 = r'0:
+
+    fix Pi
+    obtain Ci, Cj_n
+    for n in 0..0xfff:
+        let Pj, Cj = Pj_n, Cj_n
+        if l'2 <> r'0:
+            continue
+        let x = l0 ^ l'0 ^ f2i[r2 ^ r0] ^ f2i[r'2 ^ r'0]
+        for k0 in 0..0xfff:
+            if f[r0 ^ k0] ^ f[r'0 ^ k0] <> x:
+                continue
+            determine k1 from Pi, Pj, k0
+            if dblround(Ci, (k0, k1)) <> Cj:
+                continue
+            if encrypt_block(Pm, (k0, k1)) = Cm for several m:
+                print WIN!
+                print The key is (k0, k1)
+                return
+
+And now the the benchmarks.  I have generated 10 test sets in the way described
+above.
+
+By far the computationally most expensive step in the algorithm is the
+'encrypt_block ... for several m' -step.  For each test set and optimization I
+list the improvement in running time as well as the number of false positives.
+
+The number of false positives is the number of times the algorithm runs to the
+encrypt_block -step with a wrong key.
+
+Running times have been averaged over ten runs, and m was set to 3.
+
+    .--------.---------.-----------.-----------.-----------.
+    |        | No opt. | Opt. 1    |  Opt. 2   | Both opt. |
+    |--------+---------+-----------+-----------+-----------|
+    | Set 1  | - / 2   | 12% / 2   | 19% / 2   | 20% / 2   |
+    | Set 2  | - / 0   |  9% / 0   | 18% / 0   | 18% / 0   |
+    | Set 3  | - / 8   |  5% / 8   | 10% / 8   |  9% / 8   |
+    | Set 4  | - / 2   | 11% / 2   | 19% / 2   | 20% / 2   |
+    | Set 5  | - / 0   | 11% / 0   | 20% / 0   | 22% / 0   |
+    | Set 6  | - / 1   | 11% / 1   | 21% / 1   | 22% / 1   |
+    | Set 7  | - / 0   | 14% / 0   | 20% / 0   | 21% / 0   |
+    | Set 8  | - / 0   |  3% / 0   | 12% / 0   | 12% / 0   |
+    | Set 9  | - / 2   |  9% / 2   | 16% / 2   | 16% / 2   |
+    | Set 10 | - / 4   |  5% / 4   | 10% / 4   | 10% / 4   |
+    |--------+---------+-----------+-----------+-----------|
+    | Avg.   | - / 1.9 |  8% / 1.9 | 15% / 1.9 | 16% / 1.9 |
+    '--------'---------'-----------'-----------'-----------'
+
+Ok, so the optimizations is not actually able to weed out any false positives.
+The reason we see improvements is that we don't compute dblround(Ci, (k0, k1))
+for many keys.
+
+
+--
+br0ns
